@@ -163,6 +163,133 @@ void SysTick_Handler(void)
 /**
   * @}
   */ 
+extern volatile unsigned char uart_ready_to_send;
 
+extern volatile char * uart_curr_send;
+extern volatile unsigned int uart_sent_nbr;
+
+extern char * uart_mess_to_receive;
+extern volatile char * uart_curr_receive;
+extern volatile unsigned int uart_received_nbr;
+
+unsigned char pending_LF = 0;
+
+
+void  USART1_IRQHandler(void)
+{
+    unsigned char c;
+    
+    if(USART_GetITStatus(USART1,USART_IT_TXE) != RESET){
+	USART_ClearITPendingBit(USART1,USART_IT_TXE);
+	if(pending_LF){
+	    USART1->DR = '\n';
+	    pending_LF=0;	    
+	    USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+	    USART_ClearITPendingBit(USART1,USART_IT_TXE);
+	    uart_ready_to_send=1;
+	    USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+	    return;
+	    
+	    
+	}
+	
+	if(uart_curr_send == NULL){    
+	    USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+	}
+
+	if(*uart_curr_send==0){
+	    USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+	    
+	    uart_ready_to_send=1;
+	} else {
+	    USART1->DR = *uart_curr_send;
+	    uart_curr_send++; 
+	}
+	USART_ClearITPendingBit(USART1,USART_IT_TXE);	
+    }
+    if(USART_GetITStatus(USART1,USART_IT_RXNE)){
+	// echo
+	c = USART1->DR;
+	USART_ClearITPendingBit(USART1,USART_IT_RXNE);
+	((volatile USART_TypeDef*)USART1)->DR=c;
+	if(uart_curr_receive !=NULL){
+	    *uart_curr_receive++ = c;   
+	}
+	if(c=='\r'){
+	    uart_ready_to_send=0;
+	    pending_LF=1;
+	    USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+	}
+    }
+}
+
+extern volatile char MAX31820_tim_blocking;
+extern volatile char MAX31820_detecting_pulses;
+extern volatile unsigned char MAX31820_detecting_pulses_max;
+volatile uint16_t MAX31820_detected_pulse_len;
+extern volatile uint16_t MAX31820_detected_pulses;
+extern volatile uint16_t * MAX31820_detected_pulses_len;
+extern volatile unsigned char * MAX31820_detected_pulses_polarity;
+extern volatile unsigned char MAX31820_pulse_front;
+
+
+void TIM10_IRQHandler(void)
+{
+    if(TIM10->SR & TIM_SR_UIF){
+	TIM10->SR &= ~TIM_SR_UIF;
+	if(MAX31820_tim_blocking){
+	    MAX31820_tim_blocking=0;	    
+	}
+    }
+}
+
+
+void EXTI9_5_IRQHandler(void)
+{
+    uint16_t tmp;
+    // GPIOC->ODR ^= (1 << 8);
+    
+	 if( EXTI_GetITStatus(EXTI_Line5)!= RESET){
+	     EXTI_ClearITPendingBit(EXTI_Line5); // DONT MOVE THIS
+	      if(MAX31820_detecting_pulses){
+	     tmp=TIM10->CNT;
+	    
+	     if(!MAX31820_pulse_front){
+		 TIM10->CNT=0;
+		 MAX31820_pulse_front=1;
+		 MAX31820_detected_pulse_len=0;
+		
+	     } else {
+	
+		 MAX31820_pulse_front=0;	 
+		 MAX31820_detected_pulse_len=tmp;		 
+		 MAX31820_detected_pulses_polarity[MAX31820_detected_pulses]= EXTI->FTSR | EXTI_Line5 ? 1:0;
+		 MAX31820_detected_pulses_len[MAX31820_detected_pulses++]=MAX31820_detected_pulse_len;
+		 if(MAX31820_detected_pulses==MAX31820_detecting_pulses_max)
+		     MAX31820_detecting_pulses=0;	 
+	     }
+	       if(EXTI->RTSR & EXTI_Line5){ // switch trigger polarity
+		 EXTI->RTSR &= ~EXTI_Line5;
+		 EXTI->FTSR |= EXTI_Line5;
+	     } else {
+		 EXTI->FTSR &= ~EXTI_Line5;
+		 EXTI->RTSR |= EXTI_Line5;
+		 }
+
+	 }
+     }
+}
+    
+
+
+
+void I2C1_EV_IRQHandler(void)
+{
+    
+}
+void I2C1_ER_IRQHandler(void)
+{
+    
+}
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

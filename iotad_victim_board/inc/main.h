@@ -32,7 +32,14 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l1xx.h"
 #include "stm32l100c_discovery.h"
-
+#include "stm32l100c_discovery.h"
+#include "stm32l1xx_conf.h"
+#include "stm32l1xx_usart.h"
+#include "stm32l1xx_i2c.h"
+#include "stm32l1xx_syscfg.h"
+#include "stm32l1xx_exti.h"
+#include "system_stm32l1xx.h"
+#include <stdlib.h>
 /* Exported types ------------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
@@ -40,6 +47,7 @@
 /* Exported functions ------------------------------------------------------- */
 void TimingDelay_Decrement(void);
 void Delay(__IO uint32_t nTime);
+void usart_send_string(char * str);
 
 #endif /* __MAIN_H */
 
