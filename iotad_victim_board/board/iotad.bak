@@ -92,7 +92,7 @@ L R R1
 U 1 1 56B77C45
 P 3650 3100
 F 0 "R1" V 3730 3100 50  0000 C CNN
-F 1 "R" V 3650 3100 50  0000 C CNN
+F 1 "4.8k" V 3650 3100 50  0000 C CNN
 F 2 "Resistors_SMD:R_1206_HandSoldering" V 3580 3100 30  0001 C CNN
 F 3 "" H 3650 3100 30  0000 C CNN
 	1    3650 3100
@@ -104,8 +104,6 @@ Wire Wire Line
 	3900 3100 3900 2700
 Wire Wire Line
 	3100 2150 3100 2700
-Wire Wire Line
-	2800 1050 2800 2150
 Connection ~ 2800 1550
 Connection ~ 3100 2150
 Connection ~ 2800 1650
@@ -147,4 +145,9 @@ Text GLabel 3500 1150 2    60   Input ~ 0
 VCC
 Wire Wire Line
 	1950 2150 3500 2150
+Wire Wire Line
+	2800 1050 2800 2150
+Wire Wire Line
+	2800 2150 3100 2150
+Connection ~ 2800 2150
 $EndSCHEMATC

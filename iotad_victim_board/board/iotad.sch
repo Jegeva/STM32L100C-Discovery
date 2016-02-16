@@ -28,7 +28,7 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
-LIBS:iotad-cache
+LIBS:iotad
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
@@ -82,7 +82,7 @@ U 1 1 56B77BCA
 P 5100 2450
 F 0 "P2" H 5100 2800 50  0000 C CNN
 F 1 "CONN_01X06" V 5200 2450 50  0000 C CNN
-F 2 "Pin_Headers:Pin_Header_Angled_1x06" H 5100 2450 60  0001 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_1x06" H 5100 2450 60  0001 C CNN
 F 3 "" H 5100 2450 60  0000 C CNN
 	1    5100 2450
 	1    0    0    -1  
