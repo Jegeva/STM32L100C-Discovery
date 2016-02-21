@@ -73,3 +73,5 @@ tramp
 /server/
 
 /.directory
+
+./inc/eeprom_strings.h
