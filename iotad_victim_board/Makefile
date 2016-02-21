@@ -1,4 +1,4 @@
-SRCS = main.c stm32l1xx_it.c system_stm32l1xx.c
+SRCS = max31820.c 24lc.c usart.c main.c stm32l1xx_it.c system_stm32l1xx.c
 PROJ_NAME=main
 
 # that's it, no need to change anything below this line!
@@ -12,7 +12,7 @@ SIZE=arm-none-eabi-size
 CFLAGS  = -g -O2 -Wall -Tstm32_flash.ld 
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m3 -mthumb-interwork
 CFLAGS += -msoft-float
-
+FLASH_SIZE = 262144
 
 ###################################################
 
@@ -25,7 +25,7 @@ ROOT=$(shell pwd)
 
 CFLAGS += -I../STM32L100C-Discovery_lib/inc -I../../CMSIS/Include/ -Iinc 
 CFLAGS += -DARM_MATH_CM3 -lc -specs=nosys.specs
-#CFLAGS += 
+CFLAGS +=  -fdata-sections -ffunction-sections -Wl,--gc-sections -Os
 
 SRCS += ../STM32L100C-Discovery_lib/startup_stm32l1xx_hd.s # add startup file to build
 
@@ -47,6 +47,7 @@ $(PROJ_NAME).elf: $(SRCS)
 	$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
 	$(SIZE) $(PROJ_NAME).elf
+	@perl -e 'printf "USED : %0.2f%% of '$(FLASH_SIZE)' bytes\n",100*('$(FLASH_SIZE)'/(100*'`ls -l main.bin |cut -d' ' -f5`')) '
 
 prog: 
 	st-flash write $(PROJ_NAME).bin 0x8000000
@@ -62,3 +63,4 @@ clean:
 	rm -f $(PROJ_NAME).elf
 	rm -f $(PROJ_NAME).hex
 	rm -f $(PROJ_NAME).bin
+	rm -f inc/*~ src/*~ inc/\#* src/\#* ./*~ 

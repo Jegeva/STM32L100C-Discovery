@@ -39,6 +39,9 @@
 #include "stm32l1xx_syscfg.h"
 #include "stm32l1xx_exti.h"
 #include "system_stm32l1xx.h"
+#include "usart.h"
+#include "24lc.h"
+#include "max31820.h"
 #include <stdlib.h>
 /* Exported types ------------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
