@@ -76,4 +76,4 @@ tramp
 
 /.directory
 
-inc/eeprom_strings.h
+/inc/eeprom_strings.h
