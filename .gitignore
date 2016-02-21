@@ -72,6 +72,8 @@ tramp
 # server auth directory
 /server/
 
+.gdbinit
+
 /.directory
 
 ./inc/eeprom_strings.h
