@@ -164,7 +164,7 @@ void fCom_threshold(char *buff){
 		tmp_frac+=*(buff+i) - '0';
 		i++;
 	    }
-	    /*avoiding floating point by having >10000 int part , <1000 float part*/
+	    /*avoiding floating point by having >10000 int part , <10000 float part*/
 	while(tmp_frac<625)
 	    tmp_frac*=10;
 	if(!(tmp_frac%625)){	    
