@@ -22,6 +22,7 @@ uint32_t eeprom_read_int_addr(uint16_t );
 void eeprom_read_bytearray_addr(uint16_t,uint8_t* ,unsigned int);
 
 void eeprom_write_byte_addr(uint16_t,uint8_t);
+void eeprom_write_bytearray_addr(uint16_t ,uint8_t * ,unsigned int);
 
 void eeprom_write_int_addr(uint16_t,uint32_t);
 

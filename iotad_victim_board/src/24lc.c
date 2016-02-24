@@ -166,8 +166,27 @@ void eeprom_read_bytearray_addr(uint16_t addr,uint8_t* array,unsigned int size)
 
 
 
+void eeprom_write_bytearray_addr(uint16_t addr,uint8_t * data,unsigned int size)
+{
+    int sz = size;
+    uint8_t * ptr = data;
+    
+    eeprom_prelude();
+    I2C_SendData(I2C1,  (uint8_t)addr>>8);
+    while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );
+    I2C_SendData(I2C1, (uint8_t)addr&0xff);
+    while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );
+    while(sz--){	
+    I2C_SendData(I2C1, *ptr++);
+    while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );
+    }
+    
+    I2C_GenerateSTOP(I2C1,ENABLE);
+}
+
 void eeprom_write_byte_addr(uint16_t addr,uint8_t data)
 {
+    
     eeprom_prelude();
     I2C_SendData(I2C1,  (uint8_t)addr>>8);
     while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );

@@ -42,9 +42,13 @@
 #include "usart.h"
 #include "24lc.h"
 #include "max31820.h"
+#include "iotad_strings.h"
 #include <stdlib.h>
 /* Exported types ------------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
+
+#define __CONFIG_DEBUG_BIT 0x80
+
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
@@ -52,6 +56,15 @@ void TimingDelay_Decrement(void);
 void Delay(__IO uint32_t nTime);
 void usart_send_string(char * str);
 
+
+void help_for_command(char *);
+void fCom_last_temp(char *);
+void fCom_status(char *);
+void fCom_reset_measures(char *);
+void fCom_count_measures(char *);
+void fCom_version(char *);
+void fCom_threshold(char *);
+void fCom___B00MBayST1Ck__(char *);
 #endif /* __MAIN_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

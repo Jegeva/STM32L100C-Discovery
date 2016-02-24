@@ -10,6 +10,11 @@ volatile char * uart_curr_receive;
 volatile unsigned int uart_received_nbr;
 
 
+void usart_set_receive_buff(char * buff)
+{
+    uart_curr_receive=uart_mess_to_receive=buff;
+    
+}
 
 
 void usart_send_string(char * str)

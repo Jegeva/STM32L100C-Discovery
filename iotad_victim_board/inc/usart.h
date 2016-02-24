@@ -7,7 +7,12 @@
 #define PIN_USART1_TX_Source GPIO_PinSource6
 #define PIN_USART1_RX_Source GPIO_PinSource7
 #define PORT_USART1 GPIOB
+
+extern char* message;
+extern volatile uint8_t message_available ;
+
 void usart_init();
+void usart_set_receive_buff(char * );
 
 
 void usart_send_string(char *);

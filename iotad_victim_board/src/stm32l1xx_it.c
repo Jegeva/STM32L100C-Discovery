@@ -171,8 +171,9 @@ extern volatile unsigned int uart_sent_nbr;
 extern char * uart_mess_to_receive;
 extern volatile char * uart_curr_receive;
 extern volatile unsigned int uart_received_nbr;
-
+extern volatile uint8_t message_available ;
 unsigned char pending_LF = 0;
+
 
 
 void  USART1_IRQHandler(void)
@@ -213,9 +214,15 @@ void  USART1_IRQHandler(void)
 	USART_ClearITPendingBit(USART1,USART_IT_RXNE);
 	((volatile USART_TypeDef*)USART1)->DR=c;
 	if(uart_curr_receive !=NULL){
-	    *uart_curr_receive++ = c;   
+	    *uart_curr_receive++ = c;
+	   
+	    
 	}
 	if(c=='\r'){
+	    *(uart_curr_receive-1)=0;
+	    uart_curr_receive=uart_mess_to_receive;
+	    message_available=1;
+	   
 	    uart_ready_to_send=0;
 	    pending_LF=1;
 	    USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
