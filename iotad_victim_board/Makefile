@@ -34,6 +34,11 @@ ifdef DEBUG
 CFLAGS += -D__CONFIG_DEBUG -D__WRITE_EEPROM
 endif
 
+ifdef EEPROM
+CFLAGS += -D__WRITE_EEPROM
+endif
+
+
 SRCS += startup_stm32l1xx_hd.s # add startup file to build
 
 OBJS = $(SRCS:.c=.o) 
