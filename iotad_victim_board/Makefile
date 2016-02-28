@@ -10,7 +10,7 @@ CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
 SIZE=arm-none-eabi-size
 GDB=gdb-multiarch
-
+STRIP=arm-none-eabi-strip
 CFLAGS  = -g -O2 -Wall -Tstm32_flash.ld 
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m3 -mthumb-interwork
 CFLAGS += -msoft-float
@@ -56,6 +56,7 @@ proj: 	$(PROJ_NAME).elf
 
 $(PROJ_NAME).elf: $(SRCS) $(REQS)
 	$(CC) $(CFLAGS) $^ -o $@ -Llib -L../STM32L100C-Discovery_lib -L../../CMSIS/Lib/GCC/ -larm_cortexM3l_math -lstm32l1 -lm
+#	$(STRIP) $(PROJ_NAME).elf -w -K '!*__*'	
 	$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
 	$(SIZE) $(PROJ_NAME).elf

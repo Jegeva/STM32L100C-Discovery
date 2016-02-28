@@ -77,3 +77,4 @@ tramp
 /.directory
 
 /inc/eeprom_strings.h
+/pass

@@ -235,6 +235,36 @@ uint8_t comp_last_tempthreshold()
 }
 
 
+
+
+char __xoredpass[39]={0xc8,0xa9,0xfa,0xaa,0xdc,0x8c,0x0f,0x0e,0xb1,0xf1,0xe3,0xc3,0xc4,0x85,0x07,0xd7,0xa9,0xfd,0xbe,0xdb,0xbc,0xed,0xbf,0xcf,0x93,0x10,0x13,0xa2,0xd4,0xb4,0xc6,0x76,0x29,0x89,0xea,0x1a,0x4c,0xc8,0x0};
+
+
+
+
+    
+volatile int8_t ided = 0;
+
+int __validate_password(char * pass)
+{
+    char c;
+    unsigned int i=0;
+    unsigned int len=0; 
+    while(*(__xoredpass+len)!=0)
+	len++;   
+    do{
+	c =  ((~(( ( *(pass+i)   & 0x0f) << 4) | (( *(pass+i) & 0xf0 )>> 4)))^i);
+    } while(  c == *(__xoredpass+i) && *(__xoredpass+i++)!=0 );   
+
+    if(len==i)
+    {
+	return 1;
+    } else {
+	return 0;
+    }    
+}
+
+
 int main(void)
 {
 
@@ -300,7 +330,7 @@ int main(void)
     offset = 0;
     config_flags =  eeprom_read_byte_addr(offset);
     offset++;
-    for(i=0;i<3;i++)
+    for(i=0;i<2;i++)
     {
 	len = eeprom_read_byte_addr(offset);
 	offset++;
@@ -315,15 +345,40 @@ int main(void)
     usart_CRLF();
     last_temp = max3182_getTemp();
 
-    usart_send_MAX31820_temp(last_temp);
+    // usart_send_MAX31820_temp(last_temp);
     usart_CRLF();  
     STM_EVAL_LEDOn(LED4); // use to trig Logic Analyser-pc8
-    
+    usart_send_string("Password:");
     while(1)
     {
+	
+
+	
 	if(message_available){
-	    /*uart command*/    
 	    message_available=0;
+	    if(!ided){
+		if(__validate_password(message)){
+		    ided=1;
+		    i=2;
+		    len = eeprom_read_byte_addr(offset);
+		    offset++;
+		    eeprom_read_bytearray_addr(offset,(uint8_t *)message,len);
+		    offset+=len;
+		    *(message+len)=0;
+		    usart_send_string(message);	  
+		    usart_CRLF();
+		} else {
+		    ided = 0;
+		    usart_send_string("Password:");
+		}
+		
+		
+	    
+	    
+	    } else {
+
+	    /*uart command*/    
+	    
 	    command_id=id_command(message);
 	    if(command_id == -1){
 		usart_send_string("Unknown command:");
@@ -337,15 +392,19 @@ int main(void)
 	    *message=0;
 	    usart_set_receive_buff(message);
 	    
+	    }
 	}
+	
 	if(comp_last_tempthreshold()){
 	    GPIOB->ODR |= (1<<4); // boom, nuclear fallout and all, bad for the environment...
 	}
 	
+	
+	
 	Delay(1000);
 	
 	STM_EVAL_LEDToggle(LED3);
-    }
+	 }
 }
 
 /**
