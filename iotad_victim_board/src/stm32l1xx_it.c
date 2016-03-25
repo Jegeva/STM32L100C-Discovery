@@ -174,7 +174,7 @@ extern volatile unsigned int uart_received_nbr;
 extern volatile uint8_t message_available ;
 unsigned char pending_LF = 0;
 
-
+volatile uint8_t usart_password=0;
 
 void  USART1_IRQHandler(void)
 {
@@ -212,13 +212,23 @@ void  USART1_IRQHandler(void)
 	// echo
 	c = USART1->DR;
 	USART_ClearITPendingBit(USART1,USART_IT_RXNE);
-	((volatile USART_TypeDef*)USART1)->DR=c;
+	if(usart_password){
+	    ((volatile USART_TypeDef*)USART1)->DR='*';
+	} else {    
+	    ((volatile USART_TypeDef*)USART1)->DR=c;
+	}
+	
 	if(uart_curr_receive !=NULL){
 	    *uart_curr_receive++ = c;
 	   
 	    
 	}
 	if(c=='\r'){
+	    if(usart_password){
+		((volatile USART_TypeDef*)USART1)->DR=c;		
+		usart_password=0;
+	    }
+	    
 	    *(uart_curr_receive-1)=0;
 	    uart_curr_receive=uart_mess_to_receive;
 	    message_available=1;
@@ -250,6 +260,15 @@ void TIM10_IRQHandler(void)
     }
 }
 
+extern volatile uint8_t temp_sampling_timer_fired;
+void TIM5_IRQHandler(void)
+{
+    if(TIM5->SR & TIM_SR_UIF){
+	TIM5->SR &= ~TIM_SR_UIF;
+	temp_sampling_timer_fired=1;
+    }
+    
+}
 
 void EXTI9_5_IRQHandler(void)
 {

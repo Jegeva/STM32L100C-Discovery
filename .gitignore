@@ -7,6 +7,7 @@
 *.ko
 *.obj
 *.elf
+*.bin
 
 # Precompiled Headers
 *.gch
@@ -73,6 +74,9 @@ tramp
 /server/
 
 .gdbinit
+*.zip
+*.drl
+*.gbr
 
 /.directory
 

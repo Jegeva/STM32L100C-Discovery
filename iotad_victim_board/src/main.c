@@ -75,6 +75,8 @@ char * message;
 int16_t last_temp;
 
 volatile uint8_t message_available = 0;
+volatile uint8_t temp_sampling_timer_fired;
+
 
 int id_command(char* buff)
 {
@@ -106,19 +108,40 @@ void help_for_command(char * buff)
     help_for_id=id_command(buff+5);
     if(help_for_id==-1){
 	usart_send_string("Unknown help topic");
+	usart_send_string(commands_help[0]);
     } else {
 	usart_send_string(commands_help[help_for_id]);
     }
     usart_CRLF();    
 }
 
-void fCom_last_temp(char *buff){};
+void fCom_last_temp(char *buff){
+     usart_send_MAX31820_temp(last_temp);
+ usart_CRLF();  
+};
 void fCom_status(char *buff){
     	usart_send_string("Running");
 	usart_CRLF();    
 };
 void fCom_reset_measures(char *buff){};
-void fCom_count_measures(char *buff){};
+void fCom_count_measures(char *buff){
+    int offset = 1; // skip config flags and strings
+    int len,i;    
+    //int sample_nbr_offset;
+    unsigned int sample_nbr;
+    for(i=0;i<3;i++)
+    {
+	len = eeprom_read_byte_addr(offset);
+	offset++;
+	offset+=len;
+    }
+    //   sample_nbr_offset = offset;
+    eeprom_read_bytearray_addr(offset,(uint8_t *)&sample_nbr,sizeof(unsigned int));
+    usart_send_uint(sample_nbr);
+    
+    usart_CRLF();    
+};
+
 void fCom_version(char *buff){
     int len=0;
     int offset=1;
@@ -152,6 +175,10 @@ void fCom_threshold(char *buff){
 	}
 	if(tmp_int<1000){ /*checking the int par for > 1000 threshold*/
 	    usart_send_string("threshold to low, not setting it\r\n");
+	    return;
+	}
+	if(tmp_int>1000000){ /*checking the int par for > 1000 threshold*/
+	    usart_send_string("threshold to high, not setting it\r\n");
 	    return;
 	}
 //	tmp*=1000;
@@ -234,8 +261,9 @@ uint8_t comp_last_tempthreshold()
     
 }
 
+extern volatile uint8_t usart_password;
 
-
+#ifdef DIFFICULTY_LVL_1
 
 char __xoredpass[39]={0xc8,0xa9,0xfa,0xaa,0xdc,0x8c,0x0f,0x0e,0xb1,0xf1,0xe3,0xc3,0xc4,0x85,0x07,0xd7,0xa9,0xfd,0xbe,0xdb,0xbc,0xed,0xbf,0xcf,0x93,0x10,0x13,0xa2,0xd4,0xb4,0xc6,0x76,0x29,0x89,0xea,0x1a,0x4c,0xc8,0x0};
 
@@ -264,6 +292,57 @@ int __validate_password(char * pass)
     }    
 }
 
+#else
+
+volatile int8_t ided = 0;
+
+char *__pass="plaintext15not4reallygoodwaytoSt0#e";
+
+int __validate_password(char * pass)
+{
+ 
+    unsigned int i=0;
+    unsigned int len=0; 
+    while(*(__pass+len)!=0)
+	len++;   
+    while( *(pass+i)==*(__pass+i) && ( *(pass+i) !=0) ){
+	i++;
+    }
+    
+
+    if(len==i)
+    {
+	return 1;
+    } else {
+	return 0;
+    }    
+}
+
+#endif
+
+#define MAX_STORED_SAMPLES 1000
+
+void store_temp(int16_t last_temp)
+{
+    int offset = 1; // skip config flags and strings
+    int len,i;    
+    int sample_nbr_offset;
+    unsigned int sample_nbr;
+    for(i=0;i<3;i++)
+    {
+	len = eeprom_read_byte_addr(offset);
+	offset++;
+	offset+=len;
+    }
+    sample_nbr_offset = offset;
+    eeprom_read_bytearray_addr(offset,(uint8_t *)&sample_nbr,sizeof(unsigned int));
+    offset += sizeof(unsigned int);
+    sample_nbr = (sample_nbr+1) % MAX_STORED_SAMPLES;
+    offset += ((sample_nbr)*sizeof(unsigned int));
+    eeprom_write_bytearray_addr(offset,(uint8_t *)&last_temp,sizeof(uint16_t));
+    eeprom_write_bytearray_addr(sample_nbr_offset,(uint8_t *)&sample_nbr,sizeof(unsigned int));
+    
+}
 
 int main(void)
 {
@@ -280,7 +359,7 @@ int main(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB,ENABLE);
-     GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure;
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
@@ -306,6 +385,31 @@ int main(void)
   
     eeprom_init();
     
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
+    //TIM_Cmd(TIM5, ENABLE);
+    TIM_TimeBaseInitTypeDef TIM5_TimeBaseInitStruct;
+    NVIC_InitTypeDef TIM5_NVIC_InitStructure;
+    
+    TIM5_TimeBaseInitStruct.TIM_Prescaler = RCC_Clocks.PCLK2_Frequency/5; // .2 sec
+    TIM5_TimeBaseInitStruct.TIM_Period = 5;
+    TIM5_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM5_TimeBaseInitStruct.TIM_ClockDivision =TIM_CKD_DIV4;
+    // ->every 2sec
+    
+    TIM5_NVIC_InitStructure.NVIC_IRQChannel = TIM5_IRQn;
+    TIM5_NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    TIM5_NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    TIM5_NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    
+    TIM_TimeBaseInit(TIM5, &TIM5_TimeBaseInitStruct);
+
+    NVIC_Init(&TIM5_NVIC_InitStructure);
+    
+    TIM_ITConfig(TIM5, TIM_IT_Update,ENABLE);
+    TIM_Cmd(TIM5, ENABLE);
+    
+   
+    
 #ifdef __WRITE_EEPROM
     offset= 0;
     
@@ -324,6 +428,8 @@ int main(void)
 	eeprom_write_bytearray_addr(offset,(uint8_t *)eeprom_strings[i],eeprom_strings_lens[i]);
 	offset += eeprom_strings_lens[i];
     }
+    eeprom_write_int_addr(offset,0);
+    
 #endif
     
     len = 0;
@@ -348,7 +454,10 @@ int main(void)
     // usart_send_MAX31820_temp(last_temp);
     usart_CRLF();  
     STM_EVAL_LEDOn(LED4); // use to trig Logic Analyser-pc8
-    usart_send_string("Password:");
+    
+    usart_send_string("Password:");usart_password=1;
+    temp_sampling_timer_fired=1;
+    
     while(1)
     {
 	
@@ -365,7 +474,9 @@ int main(void)
 		    eeprom_read_bytearray_addr(offset,(uint8_t *)message,len);
 		    offset+=len;
 		    *(message+len)=0;
-		    usart_send_string(message);	  
+		    usart_send_string(message); usart_CRLF();
+		    usart_send_MAX31820_temp(last_temp);
+		    
 		    usart_CRLF();
 		} else {
 		    ided = 0;
@@ -399,12 +510,22 @@ int main(void)
 	    GPIOB->ODR |= (1<<4); // boom, nuclear fallout and all, bad for the environment...
 	}
 	
+//	Delay(1000);
 	
+	//STM_EVAL_LEDToggle(LED3);
+
+	if(temp_sampling_timer_fired){
+	    temp_sampling_timer_fired=0;
+	    last_temp = max3182_getTemp();
+	    store_temp(last_temp);
+	    TIM5->DIER |= TIM_DIER_UIE;
+	    STM_EVAL_LEDToggle(LED3);
+	}
+
+
 	
-	Delay(1000);
-	
-	STM_EVAL_LEDToggle(LED3);
 	 }
+    
 }
 
 /**
