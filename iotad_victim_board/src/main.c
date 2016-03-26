@@ -336,7 +336,8 @@ int __validate_password(char * pass)
 
 #endif
 
-#define MAX_STORED_SAMPLES 1000
+#define MAX_STORED_SAMPLES 32512
+// 127*1024/4 -> leave 1k alone for future strings
 
 void store_temp(int16_t last_temp)
 {
