@@ -122,9 +122,9 @@ void eeprom_read_bytearray_addr(uint16_t addr,uint8_t* array,unsigned int size)
    
     for(i=0;i<full_pages_to_read;i++){    
 	eeprom_prelude();
-	I2C_SendData(I2C1,  (uint8_t)r_addr>>8);
+	I2C_SendData(I2C1,  (uint8_t)(r_addr>>8));
 	while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );
-	I2C_SendData(I2C1, (uint8_t)r_addr&0xff);
+	I2C_SendData(I2C1, (uint8_t)(r_addr&0xff));
 	while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );
 	//seq read
 	I2C_AcknowledgeConfig(I2C1, ENABLE); // ack bytes but the last
@@ -144,9 +144,9 @@ void eeprom_read_bytearray_addr(uint16_t addr,uint8_t* array,unsigned int size)
     }
     if(remaining_bytes_to_read){
 	eeprom_prelude();
-	I2C_SendData(I2C1,  (uint8_t)r_addr>>8);
+	I2C_SendData(I2C1,  (uint8_t)(r_addr>>8));
 	while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );
-	I2C_SendData(I2C1, (uint8_t)r_addr&0xff);
+	I2C_SendData(I2C1, (uint8_t)(r_addr&0xff));
 	while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );
 	I2C_AcknowledgeConfig(I2C1, ENABLE); // ack bytes but the last
 	I2C_GenerateSTART(I2C1,ENABLE);
@@ -161,7 +161,7 @@ void eeprom_read_bytearray_addr(uint16_t addr,uint8_t* array,unsigned int size)
 	while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_RECEIVED) );
 	*(array+full_pages_to_read*EEPROM_PAGE_SZ+i)= I2C_ReceiveData(I2C1);
     }
-    
+     I2C_GenerateSTOP(I2C1,ENABLE);
 }
 
 
@@ -172,9 +172,9 @@ void eeprom_write_bytearray_addr(uint16_t addr,uint8_t * data,unsigned int size)
     uint8_t * ptr = data;
     
     eeprom_prelude();
-    I2C_SendData(I2C1,  (uint8_t)addr>>8);
+    I2C_SendData(I2C1,  (uint8_t)(addr>>8));
     while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );
-    I2C_SendData(I2C1, (uint8_t)addr&0xff);
+    I2C_SendData(I2C1, (uint8_t)(addr&0xff));
     while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );
     while(sz--){	
     I2C_SendData(I2C1, *ptr++);
@@ -188,9 +188,9 @@ void eeprom_write_byte_addr(uint16_t addr,uint8_t data)
 {
     
     eeprom_prelude();
-    I2C_SendData(I2C1,  (uint8_t)addr>>8);
+    I2C_SendData(I2C1,  (uint8_t)(addr>>8));
     while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );
-    I2C_SendData(I2C1, (uint8_t)addr&0xff);
+    I2C_SendData(I2C1, (uint8_t)(addr&0xff));
     while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );
     I2C_SendData(I2C1, data);
     while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );
@@ -200,9 +200,9 @@ void eeprom_write_byte_addr(uint16_t addr,uint8_t data)
 void eeprom_write_int_addr(uint16_t addr,uint32_t data)
 {
     eeprom_prelude();
-    I2C_SendData(I2C1,  (uint8_t)addr>>8);
+    I2C_SendData(I2C1,  (uint8_t)(addr>>8));
     while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );
-    I2C_SendData(I2C1, (uint8_t)addr&0xff);
+    I2C_SendData(I2C1, (uint8_t)(addr&0xff));
     while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );
     I2C_SendData(I2C1, (uint8_t)(data>>24));
     while( !I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED) );

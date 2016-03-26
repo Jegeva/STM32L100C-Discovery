@@ -127,9 +127,9 @@ uint8_t MAX31820_read()
 	GPIO_MA31820X_InitStructure.GPIO_Mode =  GPIO_Mode_IN; //for later
 	MAX31820_tim_block();
 	GPIO_Init(PORT_MAX31820, &GPIO_MA31820X_InitStructure);
-	GPIOC->ODR ^= (1 << 8); // see samples on log analyser
+	//GPIOC->ODR ^= (1 << 8); // see samples on log analyser
 	tmp|=(GPIOB->IDR & (1 << 5))<<2;
-	GPIOC->ODR ^= (1 << 8); // see samples on log analyser
+	//GPIOC->ODR ^= (1 << 8); // see samples on log analyser
 	TIM_MAX31820_TimeBaseInitStruct.TIM_Period = 35;
 	TIM_TimeBaseInit(TIM_MAX31820, &TIM_MAX31820_TimeBaseInitStruct);
 	MAX31820_tim_block();
@@ -157,9 +157,9 @@ uint8_t MAX31820_block_readslot0()
 	GPIO_MA31820X_InitStructure.GPIO_Mode =  GPIO_Mode_IN; //for later
 	MAX31820_tim_block();
 	GPIO_Init(PORT_MAX31820, &GPIO_MA31820X_InitStructure);
-	GPIOC->ODR ^= (1 << 8); // see samples on log analyser
+	//GPIOC->ODR ^= (1 << 8); // see samples on log analyser
 	tmp|=(GPIOB->IDR & (1 << 5))<<2;
-	GPIOC->ODR ^= (1 << 8); // see samples on log analyser
+	//GPIOC->ODR ^= (1 << 8); // see samples on log analyser
 	TIM_MAX31820_TimeBaseInitStruct.TIM_Period = 35;
 	TIM_TimeBaseInit(TIM_MAX31820, &TIM_MAX31820_TimeBaseInitStruct);
 	MAX31820_tim_block();
@@ -312,8 +312,8 @@ int16_t max3182_getTemp()
 	uid[i]=MAX31820_read();
 
     if(check_crc_uid(uid)){
-	GPIOC->ODR ^= (1 << 9);
-	GPIOC->ODR ^= (1 << 9);
+	//GPIOC->ODR ^= (1 << 9);
+	//GPIOC->ODR ^= (1 << 9);
     }
     
     
@@ -324,12 +324,12 @@ int16_t max3182_getTemp()
     MAX31820_reset();
     MAX31820_write(MAX31820_ROM_MatchRom);
   
-    GPIOC->ODR ^= (1 << 8); // see samples on log analyser
+    //GPIOC->ODR ^= (1 << 8); // see samples on log analyser
 
     for(i=0;i<8;i++)
 	MAX31820_write(uid[i]);
 
-    GPIOC->ODR ^= (1 << 8); // see samples on log analyser
+    //GPIOC->ODR ^= (1 << 8); // see samples on log analyser
     
     //while(!MAX31820_read);
     MAX31820_write(MAX31820_FUN_ReadSPad);

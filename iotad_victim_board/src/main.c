@@ -123,7 +123,22 @@ void fCom_status(char *buff){
     	usart_send_string("Running");
 	usart_CRLF();    
 };
-void fCom_reset_measures(char *buff){};
+void fCom_reset_measures(char *buff){
+    int offset = 1; // skip config flags and strings
+    int len,i;    
+    //int sample_nbr_offset;
+    unsigned int sample_nbr=0;
+    for(i=0;i<3;i++)
+    {
+	len = eeprom_read_byte_addr(offset);
+	offset++;
+	offset+=len;
+    }
+    offset++;
+    //   sample_nbr_offset = offset;
+    eeprom_write_bytearray_addr(offset,(uint8_t *)&sample_nbr,sizeof(unsigned int));
+
+};
 void fCom_count_measures(char *buff){
     int offset = 1; // skip config flags and strings
     int len,i;    
@@ -135,6 +150,7 @@ void fCom_count_measures(char *buff){
 	offset++;
 	offset+=len;
     }
+    offset++;
     //   sample_nbr_offset = offset;
     eeprom_read_bytearray_addr(offset,(uint8_t *)&sample_nbr,sizeof(unsigned int));
     usart_send_uint(sample_nbr);
@@ -324,7 +340,7 @@ int __validate_password(char * pass)
 
 void store_temp(int16_t last_temp)
 {
-    int offset = 1; // skip config flags and strings
+    uint16_t offset = 1; // skip config flags and strings
     int len,i;    
     int sample_nbr_offset;
     unsigned int sample_nbr;
@@ -334,11 +350,23 @@ void store_temp(int16_t last_temp)
 	offset++;
 	offset+=len;
     }
+    offset++;
     sample_nbr_offset = offset;
+    //usart_send_uint(sample_nbr_offset);
+    //usart_CRLF();    
     eeprom_read_bytearray_addr(offset,(uint8_t *)&sample_nbr,sizeof(unsigned int));
+    //usart_send_uint(sample_nbr_offset);
+    //usart_CRLF();    
+    //usart_send_uint(sample_nbr);
+    //usart_CRLF();    
+    
     offset += sizeof(unsigned int);
     sample_nbr = (sample_nbr+1) % MAX_STORED_SAMPLES;
     offset += ((sample_nbr)*sizeof(unsigned int));
+    if(offset>=250)
+	STM_EVAL_LEDToggle(LED3);
+    //usart_send_uint(offset);
+    //usart_CRLF();     usart_CRLF();    
     eeprom_write_bytearray_addr(offset,(uint8_t *)&last_temp,sizeof(uint16_t));
     eeprom_write_bytearray_addr(sample_nbr_offset,(uint8_t *)&sample_nbr,sizeof(unsigned int));
     
@@ -428,6 +456,7 @@ int main(void)
 	eeprom_write_bytearray_addr(offset,(uint8_t *)eeprom_strings[i],eeprom_strings_lens[i]);
 	offset += eeprom_strings_lens[i];
     }
+    offset++;
     eeprom_write_int_addr(offset,0);
     
 #endif
@@ -446,6 +475,7 @@ int main(void)
 	usart_send_string(message);	  
 	usart_CRLF();
     }
+    
     STM_EVAL_LEDOff(LED4); // use to trig Logic Analyser-pc8
     //  max3182_init();
     usart_CRLF();
@@ -519,7 +549,7 @@ int main(void)
 	    last_temp = max3182_getTemp();
 	    store_temp(last_temp);
 	    TIM5->DIER |= TIM_DIER_UIE;
-	    STM_EVAL_LEDToggle(LED3);
+	 
 	}
 
 
