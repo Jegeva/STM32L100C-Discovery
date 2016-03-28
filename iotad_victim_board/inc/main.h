@@ -64,6 +64,8 @@ void fCom_reset_measures(char *);
 void fCom_count_measures(char *);
 void fCom_version(char *);
 void fCom_threshold(char *);
+void fCom_DisplaySamples(char*);
+
 void fCom___B00MBayST1Ck__(char *);
 #endif /* __MAIN_H */
 

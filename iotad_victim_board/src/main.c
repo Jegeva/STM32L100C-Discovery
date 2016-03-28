@@ -158,6 +158,50 @@ void fCom_count_measures(char *buff){
     usart_CRLF();    
 };
 
+void fCom_DisplaySamples(char* buff)
+{   
+    int i,len;
+    unsigned int nbr,offset,sample_nbr;
+    uint16_t t;
+    
+    nbr=0;
+    offset=0;
+    i=0;
+    len=0;
+    
+    while(*(buff+len++)!=0); /*could there be a problem with the parsing code ?*/
+    len--;
+    while( (*(buff+i) < '0' || *(buff+i) > '9') && i<len  ){
+	i++;
+    }
+    while( (*(buff+i) >= '0' && *(buff+i) <= '9') && i<len ){
+	nbr*=10;
+	nbr+= (*(buff+i))-'0';
+	i++;
+    }
+    offset=1;
+    for(i=0;i<3;i++)
+    {
+	len = eeprom_read_byte_addr(offset);
+	offset++;
+	offset+=len;
+    }
+    offset++;
+    eeprom_read_bytearray_addr(offset,(uint8_t *)&sample_nbr,sizeof(unsigned int));
+    offset += sizeof(unsigned int);
+    if(nbr>sample_nbr)
+	nbr=sample_nbr;
+    
+    for(i=0;i<nbr;i++){
+	eeprom_read_bytearray_addr(offset,(uint8_t *)&t,sizeof(uint16_t));
+	offset += sizeof(uint16_t);
+	usart_send_MAX31820_temp(t);
+	usart_CRLF();    
+    }
+    
+}
+
+
 void fCom_version(char *buff){
     int len=0;
     int offset=1;
@@ -363,7 +407,7 @@ void store_temp(int16_t last_temp)
     
     offset += sizeof(unsigned int);
     sample_nbr = (sample_nbr+1) % MAX_STORED_SAMPLES;
-    offset += ((sample_nbr)*sizeof(unsigned int));
+    offset += ((sample_nbr)*sizeof(uint16_t));
     if(offset>=250)
 	STM_EVAL_LEDToggle(LED3);
     //usart_send_uint(offset);
@@ -511,6 +555,7 @@ int main(void)
 		    usart_CRLF();
 		} else {
 		    ided = 0;
+		    usart_password=1;
 		    usart_send_string("Password:");
 		}
 		

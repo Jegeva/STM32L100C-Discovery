@@ -55,7 +55,7 @@ lib:
 proj: 	$(PROJ_NAME).elf
 
 $(PROJ_NAME).elf: $(SRCS) $(REQS)
-	$(CC) $(CFLAGS) $^ -o $@ -Llib -L../STM32L100C-Discovery_lib -L../../CMSIS/Lib/GCC/ -larm_cortexM3l_math -lstm32l1 -lm
+	$(CC) $(CFLAGS) $^ -o $@ -Wall -Llib -L../STM32L100C-Discovery_lib -L../../CMSIS/Lib/GCC/ -larm_cortexM3l_math -lstm32l1 -lm
 #	$(STRIP) $(PROJ_NAME).elf -w -K '!*__*'	
 	$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
@@ -70,6 +70,8 @@ gdb :
 	sleep 1
 	echo "target extended localhost:3333\nmonitor reset halt\nmonitor reset_nag enable\nb "$(B)"\nc\n" >.gdbinit
 	$(GDB) main.elf && killall openocd
+
+
 
 clean:
 	rm -f *.o
