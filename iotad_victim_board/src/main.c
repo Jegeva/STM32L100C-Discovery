@@ -98,7 +98,7 @@ int id_command(char* buff)
 
 void help_for_command(char * buff)
 {
-    char help_mess_ar[256];
+    char help_mess_ar[64];
     int help_for_id;
     int i = 0;
     while(* (buff+i)!=0){ // whoopsie :pp
@@ -112,7 +112,9 @@ void help_for_command(char * buff)
     } else {
 	usart_send_string(commands_help[help_for_id]);
     }
-    usart_CRLF();    
+    usart_CRLF();
+   
+    
 }
 
 void fCom_last_temp(char *buff){
@@ -284,6 +286,8 @@ void fCom_threshold(char *buff){
     //threshold
 
 };
+
+// __attribute__((target("thumb")))
 void fCom___B00MBayST1Ck__(char *buff){
     if(! (config_flags & __CONFIG_DEBUG_BIT))
 	return;  

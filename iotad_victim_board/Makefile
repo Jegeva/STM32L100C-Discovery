@@ -12,7 +12,8 @@ SIZE=arm-none-eabi-size
 GDB=gdb-multiarch
 STRIP=arm-none-eabi-strip
 CFLAGS  = -g -O2 -Wall -Tstm32_flash.ld 
-CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m3 -mthumb-interwork
+CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m3
+#-mthumb-interwork
 CFLAGS += -msoft-float
 FLASH_SIZE = 262144
 

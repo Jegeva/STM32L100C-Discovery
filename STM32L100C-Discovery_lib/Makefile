@@ -6,7 +6,8 @@ AR=arm-none-eabi-ar
 vpath %.c src 
 
 CFLAGS  = -g -O2 -Wall
-CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m3 -mthumb-interwork
+CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m3
+#-mthumb-interwork
 CFLAGS += -msoft-float
 CFLAGS += -ffreestanding -nostdlib
 CFLAGS += -I../../CMSIS/Include -Iinc
