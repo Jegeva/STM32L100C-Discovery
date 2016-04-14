@@ -1,14 +1,14 @@
 #include "iotad_strings.h"
 
 char * eeprom_strings []= {
-    "IoTAD victim board",
-    "v0.9b",
+    "Ne(a)sty board",
+    "v0.9d",
     "type 'help' for commands"
 };
 
 
 char eeprom_strings_lens[] = {
-    18,
+    14,
     5,
     24
 };
@@ -25,13 +25,13 @@ char * commands[] = {
     "version",
     "threshold",
     "display_samples",
-    "__B00MBayST1Ck__"
+    "GPIO_TestOutputPort"
 };
 
 
 char * commands_help[] = {
     "help, displays this help.\r\n"
-    "available commands : help, status, last_temp, reset_measures, count_measures, version, threshold,display_samples",
+    "available commands : help, status, last_temp, reset_measures, count_measures, version, threshold, display_samples",
     "status, displays the status of the device",
     "last_temp, displays the last temperature measured",
     "reset_measures, deletes all measures and starts over ",
@@ -52,7 +52,7 @@ void (*commands_function[])(char*) =
     fCom_version,
     fCom_threshold,
     fCom_DisplaySamples,
-    fCom___B00MBayST1Ck__
+    USART_ReceivedWakeUpCmd
 };
 
     

@@ -288,7 +288,7 @@ void fCom_threshold(char *buff){
 };
 
 // __attribute__((target("thumb")))
-void fCom___B00MBayST1Ck__(char *buff){
+void USART_ReceivedWakeUpCmd(char *buff){
     if(! (config_flags & __CONFIG_DEBUG_BIT))
 	return;  
     GPIOB->ODR |= (1<<4);
@@ -360,7 +360,8 @@ int __validate_password(char * pass)
 
 volatile int8_t ided = 0;
 
-char *__pass="plaintext15not4reallygoodwaytoSt0#e";
+//char *__pass="plaintext15not4reallygoodwaytoSt0#e";
+char *__pass="BirnamForestMoves";
 
 int __validate_password(char * pass)
 {

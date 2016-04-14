@@ -66,7 +66,7 @@ void fCom_version(char *);
 void fCom_threshold(char *);
 void fCom_DisplaySamples(char*);
 
-void fCom___B00MBayST1Ck__(char *);
+void USART_ReceivedWakeUpCmd(char *);
 #endif /* __MAIN_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
